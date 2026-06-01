@@ -5018,52 +5018,8 @@ class TUIDashboard:
         self.layout = None  # Disabled Layout, using Columns instead
 
     def _setup_layout(self) -> None:
-        """Setup Rich Layout with 12 panels."""
-        try:
-            if not rich_layout:
-                return
-            
-            # Create a simple vertical layout
-            self.layout = rich_layout(name="root")
-            
-            # Split into rows
-            self.layout.split_column(
-                rich_layout(name="row1", size=10),
-                rich_layout(name="row2", size=10),
-                rich_layout(name="row3", size=10),
-                rich_layout(name="row4", size=10),
-                rich_layout(name="footer", size=3)
-            )
-            
-            # Row 1: Market + AI + Signal (3 columns)
-            self.layout["row1"].split_row(
-                rich_layout(name="panel1", ratio=1),
-                rich_layout(name="panel2", ratio=1),
-                rich_layout(name="panel3", ratio=1)
-            )
-            
-            # Row 2: Trade Manager + ML Status (2 columns)
-            self.layout["row2"].split_row(
-                rich_layout(name="panel4", ratio=1),
-                rich_layout(name="panel5", ratio=1)
-            )
-            
-            # Row 3: Learning + Quantum + Macro (3 columns)
-            self.layout["row3"].split_row(
-                rich_layout(name="panel6", ratio=1),
-                rich_layout(name="panel7", ratio=1),
-                rich_layout(name="panel8", ratio=1)
-            )
-            
-            # Row 4: SMC + AI Reasoning + Performance (3 columns)
-            self.layout["row4"].split_row(
-                rich_layout(name="panel9", ratio=1),
-                rich_layout(name="panel10", ratio=1),
-                rich_layout(name="panel11", ratio=1)
-            )
-            
-        except Exception as e:
-            logger.error(f"Layout setup failed: {e}")
+        """Setup disabled - using Columns instead."""
+        pass
 
     def render(self) -> None:
         """Render the full TUI dashboard with 12 panels."""
