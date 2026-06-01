@@ -1,209 +1,347 @@
+"""
+QUANTUM SWARM INTELLIGENCE TUI - Fixed Layout Engine
+Uses Rich Layout for strict 3-column responsive grid.
+"""
+import sys
+import time
+import asyncio
+import random
+from datetime import datetime
+from typing import Dict, Any, Optional
 
-class TUIDashboard:
-    """Rich-based TUI with 12 live panels for comprehensive trading dashboard."""
+from rich.console import Console, Group
+from rich.panel import Panel
+from rich.table import Table
+from rich.columns import Columns
+from rich.text import Text
+from rich.layout import Layout
+from rich.live import Live
+from rich import box
 
-    def __init__(self, state: SharedState) -> None:
-        """Initialize TUI Dashboard with shared state."""
-        self.state = state
-        self.console = rich_console
-        self.start_time = datetime.now(timezone.utc)
+console = Console()
 
-    def render(self) -> None:
-        """Render the full TUI dashboard with 12 panels in boxes."""
+
+class SharedMemory:
+    """Shared memory rings for 7 agents."""
+
+    def __init__(self) -> None:
+        self.agents: Dict[int, Dict[str, Any]] = {
+            1: {"name": "Data", "latency": 12.4, "status": "ONLINE"},
+            2: {"name": "Exec", "latency": 8.1, "status": "ONLINE"},
+            3: {"name": "Topol", "latency": 24.2, "status": "ONLINE"},
+            4: {"name": "Fluid", "latency": 45.1, "status": "ONLINE"},
+            5: {"name": "HoTT", "latency": 19.7, "status": "ONLINE"},
+            6: {"name": "Noise", "latency": 11.3, "status": "ONLINE"},
+            7: {"name": "Risk", "latency": 4.2, "status": "ONLINE"},
+        }
+        self.price: float = 1.08412
+        self.spread: float = 0.1
+        self.tick_count: int = 842100
+        self.latency: float = 0.8
+        self.dd_current: float = 0.14
+        self.dd_max: float = 2.00
+        self.reynolds: float = 4812.94
+        self.buy_pressure: float = 94.2
+        self.sell_pressure: float = 12.1
+
+    def update(self) -> None:
+        """Simulate real-time data updates from agents."""
+        self.price += random.uniform(-0.00005, 0.00005)
+        self.price = round(self.price, 5)
+        self.spread = round(random.uniform(0.05, 0.15), 1)
+        self.tick_count += random.randint(100, 500)
+        self.latency = round(random.uniform(0.5, 1.5), 1)
+        self.dd_current = round(random.uniform(0.05, 0.25), 2)
+        self.reynolds = round(random.uniform(4000, 6000), 2)
+        self.buy_pressure = round(random.uniform(80, 99), 1)
+        self.sell_pressure = round(random.uniform(5, 20), 1)
+        for agent in self.agents.values():
+            agent["latency"] = round(random.uniform(3, 50), 1)
+
+
+def build_header() -> Panel:
+    """Build the main header panel."""
+    return Panel(
+        Text(
+            "QUANTUM SWARM INTELLIGENCE TRADING ENGINE [v7.0.1-PROD]  |  SYSTEM: OPERATIONAL",
+            style="bold cyan",
+            justify="center",
+        ),
+        style="bold blue",
+        box=box.DOUBLE,
+        expand=True,
+    )
+
+
+def build_panel1(state: SharedMemory) -> Panel:
+    """Panel 1: Agent Swarm Telemetry."""
+    tbl = Table(box=None, expand=True, show_header=True, header_style="bold cyan", padding=(0, 1))
+    tbl.add_column("Agent", style="white", width=22, no_wrap=True, overflow="ellipsis")
+    tbl.add_column("Latency", style="yellow", width=10, no_wrap=True)
+    tbl.add_column("Status", style="green", width=8, no_wrap=True)
+    for num, agent in state.agents.items():
+        tbl.add_row(
+            f"Agent {num} ({agent['name']})",
+            f"{agent['latency']}\u03bcs",
+            f"[{agent['status']}]",
+        )
+    return Panel(tbl, title="[1] AGENT SWARM TELEMETRY", border_style="cyan", expand=True)
+
+
+def build_panel2(state: SharedMemory) -> Panel:
+    """Panel 2: p-ADIC Liquidity Density Matrix."""
+    tbl = Table(box=None, expand=True, show_header=True, header_style="bold magenta", padding=(0, 1))
+    tbl.add_column("Prime", style="yellow", width=6, no_wrap=True)
+    tbl.add_column("Pattern", style="white", width=20, no_wrap=True, overflow="ellipsis")
+    tbl.add_column("Status", style="green", width=9, no_wrap=True)
+    tbl.add_row("p=2:", f"[{''.join(str(random.randint(0,1)) for _ in range(10))}..]", "Dense")
+    tbl.add_row("p=3:", f"[{''.join(str(random.randint(0,2)) for _ in range(10))}..]", "Cluster")
+    tbl.add_row("p=5:", f"[{''.join(str(random.randint(0,5)) for _ in range(10))}..]", "Scatter")
+    tbl.add_row("", f"Dist: 2^(-{random.randint(2,8)})", "")
+    tbl.add_row("", f"Reversal: {random.uniform(90,99):.1f}%", "")
+    return Panel(tbl, title="[2] p-ADIC LIQUIDITY MATRIX", border_style="magenta", expand=True)
+
+
+def build_panel3(state: SharedMemory) -> Panel:
+    """Panel 3: Navier-Stokes Fluid Turbulence."""
+    re = state.reynolds
+    turb = "HIGH" if re > 5000 else "MED" if re > 3000 else "LOW"
+    tbl = Table(box=None, expand=True, show_header=False, padding=(0, 0))
+    tbl.add_column("G", style="white", width=40, no_wrap=True)
+    tbl.add_row("100% |         \u25b2   \u25b2")
+    tbl.add_row(" 75% |        \u25b2\u25b2\u25b2 \u25b2\u25b2\u25b2\u25b2")
+    tbl.add_row(" 50% |      \u25b2\u25b2\u25b2\u25b2\u25b2\u25b2\u25b2\u25b2\u25b2\u25b2\u25b2")
+    tbl.add_row(" 25% |\u25b2\u25b2\u25b2\u25b2\u25b2\u25b2\u25b2\u25b2\u25b2\u25b2\u25b2\u25b2\u25b2\u25b2\u25b2\u25b2")
+    tbl.add_row("  0% \u2514\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500")
+    tbl.add_row(f"Flow: {turb} TURBULENCE")
+    tbl.add_row(f"Re: {re:,.2f}")
+    return Panel(tbl, title="[3] NAVIER-STOKES FLUID", border_style="green", expand=True)
+
+
+def build_panel4(state: SharedMemory) -> Panel:
+    """Panel 4: Order Book Vacuum Line."""
+    bid_v = round(random.uniform(1.5, 3.0), 1)
+    ask_v = round(random.uniform(3.0, 6.0), 1)
+    ask_bar = "\u2593" * int(ask_v * 2)
+    bid_bar = "\u2591" * int(bid_v * 2)
+    tbl = Table(box=None, expand=True, show_header=True, header_style="bold yellow", padding=(0, 1))
+    tbl.add_column("Lvl", style="cyan", width=8, no_wrap=True)
+    tbl.add_column("Price", style="white", width=10, no_wrap=True)
+    tbl.add_column("Vol", style="magenta", width=22, no_wrap=True, overflow="ellipsis")
+    tbl.add_row("ASK", f"[{state.price + 0.00008:.5f}]", f"{ask_bar} {ask_v}M")
+    tbl.add_row("BID", f"[{state.price - 0.00002:.5f}]", f"{bid_bar} {bid_v}M")
+    tbl.add_row("TGT", f"[{state.price - 0.00015:.5f}]", "TOPO HOLE DETECTED")
+    return Panel(tbl, title="[4] ORDER BOOK VACUUM LINE", border_style="yellow", expand=True)
+
+
+def build_panel5(state: SharedMemory) -> Panel:
+    """Panel 5: Riemann Zeta Critical Strip."""
+    tbl = Table(box=None, expand=True, show_header=True, header_style="bold cyan", padding=(0, 1))
+    tbl.add_column("Metric", style="white", width=18, no_wrap=True)
+    tbl.add_column("Value", style="green", width=14, no_wrap=True)
+    tbl.add_row("Zeros Line:", "\u03c3 = 1/2")
+    tbl.add_row("Wave Interf.:", "HARMONIC")
+    tbl.add_row("Reversal:", f"T-{random.randint(50,200)}ms")
+    return Panel(tbl, title="[5] RIEMANN ZETA", border_style="cyan", expand=True)
+
+
+def build_panel6(state: SharedMemory) -> Panel:
+    """Panel 6: Ergodic Noise Filtering."""
+    trend = random.choice(["BULLISH", "BEARISH", "NEUTRAL"])
+    tbl = Table(box=None, expand=True, show_header=True, header_style="bold green", padding=(0, 1))
+    tbl.add_column("Metric", style="white", width=18, no_wrap=True)
+    tbl.add_column("Value", style="cyan", width=16, no_wrap=True, overflow="ellipsis")
+    tbl.add_row("Raw Variance:", f"{random.uniform(70,95):.1f}%")
+    tbl.add_row("Clean Vector:", f"[{random.uniform(0.5,0.9):.3f}]")
+    tbl.add_row("Trend:", f"\u2500\u2500\u25ba [{trend}]")
+    return Panel(tbl, title="[6] ERGODIC NOISE", border_style="green", expand=True)
+
+
+def build_panel7(state: SharedMemory) -> Panel:
+    """Panel 7: HoTT Binary Mutation Prover."""
+    tbl = Table(box=None, expand=True, show_header=True, header_style="bold magenta", padding=(0, 1))
+    tbl.add_column("Status", style="white", width=18, no_wrap=True)
+    tbl.add_column("Detail", style="green", width=16, no_wrap=True)
+    tbl.add_row("Mutation ID:", f"#0x{random.randint(10000,99999):05X}")
+    tbl.add_row("Proof:", "SUCCESS")
+    tbl.add_row("RAM Binary:", f"mutant_0x{random.randint(10,99):X}.bin")
+    return Panel(tbl, title="[7] HoTT MUTATION", border_style="magenta", expand=True)
+
+
+def build_panel8(state: SharedMemory) -> Panel:
+    """Panel 8: Real-Time Position Matrices."""
+    pnl = round(random.uniform(-500, 500), 0)
+    pc = "green" if pnl > 0 else "red"
+    tbl = Table(box=None, expand=True, show_header=True, header_style="bold cyan", padding=(0, 1))
+    tbl.add_column("Pair", style="white", width=8, no_wrap=True)
+    tbl.add_column("Type", style="green", width=5, no_wrap=True)
+    tbl.add_column("Lots", style="yellow", width=5, no_wrap=True)
+    tbl.add_column("Entry", style="cyan", width=10, no_wrap=True)
+    tbl.add_column("PnL", style=pc, width=8, no_wrap=True)
+    tbl.add_row("XAUUSD", "BUY", "1.0", f"{state.price - 0.002:.5f}", f"+${pnl:.0f}" if pnl > 0 else f"-${abs(pnl):.0f}")
+    return Panel(tbl, title="[8] POSITION MATRICES", border_style="cyan", expand=True)
+
+
+def build_panel9(state: SharedMemory) -> Panel:
+    """Panel 9: Cybernetic Drawdown Controller."""
+    dd_s = "STABLE" if state.dd_current < state.dd_max * 0.5 else "WARN" if state.dd_current < state.dd_max else "CRIT"
+    tbl = Table(box=None, expand=True, show_header=True, header_style="bold yellow", padding=(0, 1))
+    tbl.add_column("Metric", style="white", width=16, no_wrap=True)
+    tbl.add_column("Value", style="green", width=12, no_wrap=True)
+    tbl.add_row("Max DD:", f"{state.dd_max:.2f}%")
+    tbl.add_row("Current:", f"{state.dd_current:.2f}%")
+    tbl.add_row("Loop:", f"{dd_s}")
+    return Panel(tbl, title="[9] DRAWDOWN CTRL", border_style="yellow", expand=True)
+
+
+def build_panel10(state: SharedMemory) -> Panel:
+    """Panel 10: Metrics & Spread Tracker."""
+    tbl = Table(box=None, expand=True, show_header=True, header_style="bold green", padding=(0, 1))
+    tbl.add_column("Metric", style="white", width=18, no_wrap=True)
+    tbl.add_column("Value", style="cyan", width=14, no_wrap=True)
+    tbl.add_row("Spread:", f"{state.spread} Pips")
+    tbl.add_row("Ticks:", f"{state.tick_count:,}/s")
+    tbl.add_row("Latency:", f"{state.latency} ms")
+    return Panel(tbl, title="[10] METRICS TRACKER", border_style="green", expand=True)
+
+
+def build_panel11(state: SharedMemory) -> Panel:
+    """Panel 11: QCD Gluon Pressure Stream."""
+    buy_b = "\u25a0" * int(state.buy_pressure / 3)
+    sell_b = "\u25a0" * int(state.sell_pressure / 3)
+    mult = state.buy_pressure / max(state.sell_pressure, 0.1)
+    tbl = Table(box=None, expand=True, show_header=False, padding=(0, 1))
+    tbl.add_column("C", style="white", width=70, no_wrap=True, overflow="ellipsis")
+    tbl.add_row(f"BUY:  [{buy_b}] {state.buy_pressure} GW")
+    tbl.add_row(f"SELL: [{sell_b}] {state.sell_pressure} GW")
+    tbl.add_row(f"Force: {mult:.1f}x ({'BREAKOUT' if mult > 5 else 'STABLE'})")
+    return Panel(tbl, title="[11] QCD GLUON STREAM", border_style="red", expand=True)
+
+
+def build_panel12(state: SharedMemory) -> Panel:
+    """Panel 12: Black Swan GAN Matrix."""
+    tbl = Table(box=None, expand=True, show_header=True, header_style="bold red", padding=(0, 1))
+    tbl.add_column("Metric", style="white", width=16, no_wrap=True)
+    tbl.add_column("Value", style="green", width=14, no_wrap=True)
+    tbl.add_row("Sim:", "Swiss Peg")
+    tbl.add_row("Survival:", f"{random.uniform(99.5,99.99):.1f}%")
+    tbl.add_row("Edge:", "OPTIMAL")
+    tbl.add_row("Vuln:", "NONE")
+    return Panel(tbl, title="[12] BLACK SWAN GAN", border_style="red", expand=True)
+
+
+def build_panel13(state: SharedMemory) -> Panel:
+    """Panel 13: Live Interfaces & Execution Logs."""
+    now = datetime.now()
+    tbl = Table(box=None, expand=True, show_header=True, header_style="bold cyan", padding=(0, 1))
+    tbl.add_column("Time", style="yellow", width=10, no_wrap=True)
+    tbl.add_column("Event", style="white", width=40, no_wrap=True, overflow="ellipsis")
+    tbl.add_row(f"{now:%H:%M:%S}.{random.randint(100,999)}", "Agent1 FIX Packet Ingested")
+    tbl.add_row(f"{now:%H:%M:%S}.{random.randint(100,999)}", f"Agent3 Void at {state.price - 0.0002:.5f}")
+    tbl.add_row(f"{now:%H:%M:%S}.{random.randint(100,999)}", f"Agent6 Vector {random.uniform(98,99.9):.0f}%")
+    tbl.add_row(f"{now:%H:%M:%S}.{random.randint(100,999)}", "Agent2 BUY 1.0 LOT EXECUTED")
+    return Panel(tbl, title="[13] EXECUTION LOGS", border_style="cyan", expand=True)
+
+
+def build_layout(state: SharedMemory) -> Layout:
+    """
+    Build a strict 3-column layout:
+      Left:   [1] Telemetry, [9] Drawdown, [10] Metrics, [11] Perf, [12] Evolution
+      Middle: [2] p-Adic,    [5] Riemann,  [6] Ergodic,  [8] Positions
+      Right:  [3] Fluid,     [4] OrderBook,[7] HoTT,     [13] Logs
+    """
+    # Create the root layout split into 3 columns
+    root = Layout(name="root")
+    root.split_row(
+        Layout(name="left", ratio=1),
+        Layout(name="middle", ratio=1),
+        Layout(name="right", ratio=1),
+    )
+
+    # Left column: 5 panels stacked vertically
+    left = Layout(name="left")
+    left.split_column(
+        Layout(name="p1", size=8),
+        Layout(name="p9", size=6),
+        Layout(name="p10", size=6),
+        Layout(name="p11", size=5),
+        Layout(name="p12", size=7),
+    )
+    left["p1"].update(build_panel1(state))
+    left["p9"].update(build_panel9(state))
+    left["p10"].update(build_panel10(state))
+    left["p11"].update(build_panel11(state))
+    left["p12"].update(build_panel12(state))
+
+    # Middle column: 4 panels stacked vertically
+    middle = Layout(name="middle")
+    middle.split_column(
+        Layout(name="p2", size=9),
+        Layout(name="p5", size=6),
+        Layout(name="p6", size=6),
+        Layout(name="p8", size=7),
+    )
+    middle["p2"].update(build_panel2(state))
+    middle["p5"].update(build_panel5(state))
+    middle["p6"].update(build_panel6(state))
+    middle["p8"].update(build_panel8(state))
+
+    # Right column: 4 panels stacked vertically
+    right = Layout(name="right")
+    right.split_column(
+        Layout(name="p3", size=9),
+        Layout(name="p4", size=6),
+        Layout(name="p7", size=6),
+        Layout(name="p13", size=7),
+    )
+    right["p3"].update(build_panel3(state))
+    right["p4"].update(build_panel4(state))
+    right["p7"].update(build_panel7(state))
+    right["p13"].update(build_panel13(state))
+
+    root["left"].update(left)
+    root["middle"].update(middle)
+    root["right"].update(right)
+
+    return root
+
+
+async def run_tui() -> None:
+    """Run the TUI with Rich Live at 60 FPS."""
+    state = SharedMemory()
+
+    console.clear()
+    console.print("[bold cyan]Starting QUANTUM SWARM INTELLIGENCE TUI...[/]")
+    console.print("[dim]Press Ctrl+C to exit[/]")
+    await asyncio.sleep(1)
+
+    header = build_header()
+
+    with Live(
+        Group(header, "", build_layout(state)),
+        console=console,
+        refresh_per_second=60,
+        vertical_overflow="crop",
+    ) as live:
         try:
-            if not self.console:
-                self._render_text()
-                return
+            frame = 0
+            while True:
+                state.update()
+                if frame % 10 == 0:
+                    live.update(Group(header, "", build_layout(state)))
+                frame += 1
+                await asyncio.sleep(0.016)
+        except KeyboardInterrupt:
+            pass
 
-            from rich.panel import Panel
-            from rich.table import Table
-            from rich.columns import Columns
-            from rich.text import Text
-            from rich import box
-            
-            self.console.clear()
-            
-            # Header
-            header = Panel(
-                Text("XAUUSD GOD BOT v3.0 | AI Trading System", style="bold cyan", justify="center"),
-                style="bold blue",
-                box=box.DOUBLE
-            )
-            self.console.print(header)
-            self.console.print()
-            
-            # Get state data
-            s = self.state
-            price = getattr(s, 'current_price', 2358.21)
-            regime = getattr(s, 'current_regime', 'RANGE')
-            equity = getattr(s, 'equity_curve', [10000])[-1] if hasattr(s, 'equity_curve') and s.equity_curve else 10000
-            
-            # PANEL 1: Market Scanner
-            p1 = Table(show_header=True, header_style="bold green", box=box.ROUNDED, expand=True)
-            p1.add_column("TF", style="cyan", width=4)
-            p1.add_column("Price", style="white", width=10)
-            p1.add_column("Chg%", style="yellow", width=6)
-            p1.add_column("ATR", style="magenta", width=5)
-            p1.add_row("M1", f"${price:.2f}", "+0.12%", "2.45")
-            p1.add_row("M5", f"${price-0.5:.2f}", "+0.08%", "3.12")
-            p1.add_row("M15", f"${price-1.2:.2f}", "-0.05%", "4.23")
-            p1.add_row("H1", f"${price-2.0:.2f}", "+0.15%", "5.67")
-            p1.add_row("H4", f"${price-5.0:.2f}", "+0.32%", "8.91")
-            p1.add_row("D1", f"${price-10.0:.2f}", "+0.85%", "12.45")
-            panel1 = Panel(p1, title="[bold green]📊 MARKET SCANNER[/]", border_style="green", expand=True)
-            
-            # PANEL 2: AI Analysis
-            p2 = Table(show_header=True, header_style="bold cyan", box=box.ROUNDED, expand=True)
-            p2.add_column("Model", style="cyan", width=10)
-            p2.add_column("Signal", style="white", width=6)
-            p2.add_column("Conf%", style="yellow", width=5)
-            models = [("LSTM", "BUY", "78"), ("XGBoost", "BUY", "72"), 
-                     ("Transf.", "SELL", "65"), ("TCN", "BUY", "69"),
-                     ("Meta", "BUY", "81"), ("LGBM", "BUY", "74")]
-            for m in models:
-                p2.add_row(m[0], m[1], m[2])
-            panel2 = Panel(p2, title="[bold cyan]🤖 AI MODELS[/]", border_style="cyan", expand=True)
-            
-            # PANEL 3: Signal Dashboard
-            signal_score = 780
-            signal_color = "green" if signal_score >= 750 else "yellow"
-            p3 = Table(box=box.ROUNDED, expand=True)
-            p3.add_column("Item", style="cyan", width=10)
-            p3.add_column("Value", style="white", width=10)
-            p3.add_row("Signal", f"[bold {signal_color}]BUY[/]")
-            p3.add_row("Score", f"[bold {signal_color}]{signal_score}/1000[/]")
-            p3.add_row("Entry", f"${price:.2f}")
-            p3.add_row("Stop", f"${price - 5:.2f}")
-            p3.add_row("TP1", f"${price + 10:.2f}")
-            p3.add_row("R:R", "1:2.0")
-            panel3 = Panel(p3, title="[bold yellow]🎯 SIGNAL[/]", border_style="yellow", expand=True)
-            
-            # Render Row 1
-            self.console.print(Columns([panel1, panel2, panel3], equal=True, expand=True))
-            self.console.print()
-            
-            # PANEL 4: Trade Manager
-            p4 = Table(show_header=True, header_style="bold magenta", box=box.ROUNDED, expand=True)
-            p4.add_column("Dir", style="cyan", width=4)
-            p4.add_column("Entry", style="white", width=10)
-            p4.add_column("Current", style="white", width=10)
-            p4.add_column("P&L", style="green", width=8)
-            p4.add_row("BUY", f"${price-2:.2f}", f"${price:.2f}", "+$125")
-            p4.add_row("SELL", f"${price+1:.2f}", f"${price:.2f}", "-$45")
-            panel4 = Panel(p4, title="[bold magenta]💰 TRADES[/]", border_style="magenta", expand=True)
-            
-            # PANEL 5: ML Status
-            p5 = Table(show_header=True, header_style="bold blue", box=box.ROUNDED, expand=True)
-            p5.add_column("Model", style="cyan", width=10)
-            p5.add_column("Acc%", style="white", width=5)
-            p5.add_column("Status", style="green", width=6)
-            ml = [("LSTM", "72", "OK"), ("XGB", "68", "OK"), 
-                 ("LGBM", "71", "OK"), ("CB", "69", "OK"), ("RF", "67", "OK")]
-            for m in ml:
-                p5.add_row(m[0], m[1], m[2])
-            panel5 = Panel(p5, title="[bold blue]🧠 ML STATUS[/]", border_style="blue", expand=True)
-            
-            # PANEL 6: Learning Log
-            p6 = Table(box=box.ROUNDED, expand=True)
-            p6.add_column("Event", style="white", width=25)
-            logs = ["✅ Pattern detected", "📈 RSI divergence", 
-                   "🔄 Model retrained", "⚠️ Vol spike"]
-            for log in logs:
-                p6.add_row(log)
-            panel6 = Panel(p6, title="[bold white]📚 LEARNING[/]", border_style="white", expand=True)
-            
-            # Render Row 2
-            self.console.print(Columns([panel4, panel5, panel6], equal=True, expand=True))
-            self.console.print()
-            
-            # PANEL 7: Quantum Analysis
-            p7 = Table(box=box.ROUNDED, expand=True)
-            p7.add_column("Metric", style="cyan", width=12)
-            p7.add_column("Value", style="white", width=8)
-            p7.add_row("Lyapunov", "0.15")
-            p7.add_row("Entropy", "LOW")
-            p7.add_row("Predict.", "45 min")
-            p7.add_row("Chaos", "STABLE")
-            panel7 = Panel(p7, title="[bold magenta]⚛️ QUANTUM[/]", border_style="magenta", expand=True)
-            
-            # PANEL 8: Macro Intel
-            p8 = Table(box=box.ROUNDED, expand=True)
-            p8.add_column("Ind", style="cyan", width=8)
-            p8.add_column("Val", style="white", width=6)
-            p8.add_column("Trend", style="yellow", width=5)
-            p8.add_row("DXY", "104.2", "↑")
-            p8.add_row("US10Y", "4.5%", "↑")
-            p8.add_row("VIX", "18.5", "↓")
-            p8.add_row("Au/Ag", "82.3", "→")
-            panel8 = Panel(p8, title="[bold green]🌍 MACRO[/]", border_style="green", expand=True)
-            
-            # PANEL 9: SMC Structure
-            p9 = Table(box=box.ROUNDED, expand=True)
-            p9.add_column("Level", style="cyan", width=8)
-            p9.add_column("Type", style="white", width=15)
-            p9.add_row("2355", "████ Bull OB")
-            p9.add_row("2360", "░░░░ FVG")
-            p9.add_row("2365", "---- Resist")
-            p9.add_row("2350", "==== Support")
-            panel9 = Panel(p9, title="[bold cyan]🏗️ SMC[/]", border_style="cyan", expand=True)
-            
-            # Render Row 3
-            self.console.print(Columns([panel7, panel8, panel9], equal=True, expand=True))
-            self.console.print()
-            
-            # PANEL 10: AI Reasoning
-            p10 = Table(box=box.ROUNDED, expand=True)
-            p10.add_column("Factor", style="white", width=25)
-            reasons = ["✅ Trend bullish", "✅ OB valid", 
-                      "✅ FVG present", "⚠️ VIX caution"]
-            for r in reasons:
-                p10.add_row(r)
-            panel10 = Panel(p10, title="[bold yellow]📖 REASONING[/]", border_style="yellow", expand=True)
-            
-            # PANEL 11: Performance
-            p11 = Table(box=box.ROUNDED, expand=True)
-            p11.add_column("Metric", style="cyan", width=10)
-            p11.add_column("Value", style="white", width=10)
-            p11.add_row("Win%", "65%")
-            p11.add_row("Sharpe", "2.1")
-            p11.add_row("MaxDD", "8.2%")
-            p11.add_row("P&L", "+$2,450")
-            panel11 = Panel(p11, title="[bold green]📊 PERF[/]", border_style="green", expand=True)
-            
-            # PANEL 12: Evolution
-            p12 = Table(box=box.ROUNDED, expand=True)
-            p12.add_column("System", style="cyan", width=8)
-            p12.add_column("Status", style="white", width=12)
-            p12.add_row("NAS", "Gen 45/100")
-            p12.add_row("GA", "Gen 23/50")
-            p12.add_row("AutoML", "Testing")
-            p12.add_row("PBT", "Running")
-            panel12 = Panel(p12, title="[bold blue]⚙️ EVOLUTION[/]", border_style="blue", expand=True)
-            
-            # Render Row 4
-            self.console.print(Columns([panel10, panel11, panel12], equal=True, expand=True))
-            
-            # Footer
-            footer = Panel(
-                Text("[P] Pause | [R] Resume | [Q] Quit | [B] Backtest | [S] Signal | [X] Close", 
-                     style="dim", justify="center"),
-                style="dim",
-                box=box.SIMPLE
-            )
-            self.console.print()
-            self.console.print(footer)
-            
-        except Exception as e:
-            logger.error(f"TUI render failed: {e}")
-            self._render_text()
 
-    def _render_text(self) -> None:
-        """Fallback text rendering."""
-        try:
-            s = self.state
-            price = getattr(s, 'current_price', 2358.21)
-            print("\n" + "=" * 60)
-            print(f"  XAUUSD GOD BOT v3.0 | Price: ${price:.2f}")
-            print("=" * 60)
-        except Exception as e:
-            print(f"Error: {e}")
+def main() -> None:
+    """Entry point."""
+    try:
+        asyncio.run(run_tui())
+    except KeyboardInterrupt:
+        console.print("\n[bold green]TUI stopped![/]")
+
+
+if __name__ == "__main__":
+    main()
