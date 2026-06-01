@@ -5011,16 +5011,11 @@ class TUIDashboard:
     """Rich-based TUI with 12 live panels for comprehensive trading dashboard."""
 
     def __init__(self, state: SharedState) -> None:
-        """Initialize TUI Dashboard with shared state.
-        
-        Args:
-            state: SharedState object containing all trading data
-        """
+        """Initialize TUI Dashboard with shared state."""
         self.state = state
         self.console = rich_console
         self.start_time = datetime.now(timezone.utc)
-        self.layout: Optional[Any] = None
-        self._setup_layout()
+        self.layout = None  # Disabled Layout, using Columns instead
 
     def _setup_layout(self) -> None:
         """Setup Rich Layout with 12 panels."""
@@ -5145,22 +5140,43 @@ class TUIDashboard:
             self._render_compact(panels)
 
     def _render_compact(self, panels: Dict[int, Any]) -> None:
-        """Render using 3-column Layout grid from fixed_tui_new."""
+        """Render using 3-column grid with Columns."""
         try:
-            from rich.console import Group
             from rich.panel import Panel
             from rich.text import Text
+            from rich.columns import Columns
             from rich import box
-            from fixed_tui_new import SharedMemory as FixedSharedMemory, build_layout, build_header
-
-            # Create a temporary SharedMemory for the Layout TUI
-            temp_state = FixedSharedMemory()
-            temp_state.price = getattr(self.state, 'current_price', 1.08412)
 
             self.console.clear()
-            header = build_header()
-            layout = build_layout(temp_state)
-            self.console.print(Group(header, "", layout))
+
+            # Header
+            header = Panel(
+                Text("QUANTUM SWARM INTELLIGENCE TRADING ENGINE [v7.0.1-PROD]  |  SYSTEM: OPERATIONAL",
+                     style="bold cyan", justify="center"),
+                style="bold blue",
+                box=box.DOUBLE
+            )
+            self.console.print(header)
+            self.console.print()
+
+            # Row 1: Panel 1, 2, 3
+            self.console.print(Columns([panels[1], panels[2], panels[3]], equal=True, expand=True))
+            self.console.print()
+
+            # Row 2: Panel 9, 5, 4
+            self.console.print(Columns([panels[9], panels[5], panels[4]], equal=True, expand=True))
+            self.console.print()
+
+            # Row 3: Panel 10, 6, 7
+            self.console.print(Columns([panels[10], panels[6], panels[7]], equal=True, expand=True))
+            self.console.print()
+
+            # Row 4: Panel 11, 8, 13
+            self.console.print(Columns([panels[11], panels[8], panels[13]], equal=True, expand=True))
+            self.console.print()
+
+            # Row 5: Panel 12 (full width)
+            self.console.print(panels[12])
 
             # Footer
             footer = Panel(
@@ -5173,7 +5189,7 @@ class TUIDashboard:
             self.console.print(footer)
 
         except Exception as e:
-            logger.error(f"Layout render failed: {e}")
+            logger.error(f"Render failed: {e}")
             self._render_text()
 
     def _render_text(self) -> None:
