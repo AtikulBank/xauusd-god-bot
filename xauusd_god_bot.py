@@ -104,7 +104,7 @@ try:
         from rich.columns import Columns
         from rich.progress import Progress
         from rich.align import Align
-        from rich import box as rich_box
+        from rich import box
         rich_console = Console()
         rich_panel = Panel
         rich_table = Table
@@ -5011,64 +5011,15 @@ class TUIDashboard:
     """Rich-based TUI with 12 live panels for comprehensive trading dashboard."""
 
     def __init__(self, state: SharedState) -> None:
-        """Initialize TUI Dashboard with shared state.
-        
-        Args:
-            state: SharedState object containing all trading data
-        """
+        """Initialize TUI Dashboard with shared state."""
         self.state = state
         self.console = rich_console
         self.start_time = datetime.now(timezone.utc)
-        self.layout: Optional[Any] = None
-        self._setup_layout()
+        self.layout = None  # Disabled Layout, using Columns instead
 
     def _setup_layout(self) -> None:
-        """Setup Rich Layout with 12 panels."""
-        try:
-            if not rich_layout:
-                return
-            
-            # Create a simple vertical layout
-            self.layout = rich_layout(name="root")
-            
-            # Split into rows
-            self.layout.split_column(
-                rich_layout(name="row1", size=10),
-                rich_layout(name="row2", size=10),
-                rich_layout(name="row3", size=10),
-                rich_layout(name="row4", size=10),
-                rich_layout(name="footer", size=3)
-            )
-            
-            # Row 1: Market + AI + Signal (3 columns)
-            self.layout["row1"].split_row(
-                rich_layout(name="panel1", ratio=1),
-                rich_layout(name="panel2", ratio=1),
-                rich_layout(name="panel3", ratio=1)
-            )
-            
-            # Row 2: Trade Manager + ML Status (2 columns)
-            self.layout["row2"].split_row(
-                rich_layout(name="panel4", ratio=1),
-                rich_layout(name="panel5", ratio=1)
-            )
-            
-            # Row 3: Learning + Quantum + Macro (3 columns)
-            self.layout["row3"].split_row(
-                rich_layout(name="panel6", ratio=1),
-                rich_layout(name="panel7", ratio=1),
-                rich_layout(name="panel8", ratio=1)
-            )
-            
-            # Row 4: SMC + AI Reasoning + Performance (3 columns)
-            self.layout["row4"].split_row(
-                rich_layout(name="panel9", ratio=1),
-                rich_layout(name="panel10", ratio=1),
-                rich_layout(name="panel11", ratio=1)
-            )
-            
-        except Exception as e:
-            logger.error(f"Layout setup failed: {e}")
+        """Setup disabled - using Columns instead."""
+        pass
 
     def render(self) -> None:
         """Render the full TUI dashboard with 12 panels."""
@@ -5145,46 +5096,56 @@ class TUIDashboard:
             self._render_compact(panels)
 
     def _render_compact(self, panels: Dict[int, Any]) -> None:
-        """Render in compact mode without Layout."""
+        """Render using 3-column grid with Columns."""
         try:
+            from rich.panel import Panel
+            from rich.text import Text
+            from rich.columns import Columns
+            from rich import box
+
             self.console.clear()
-            
+
             # Header
-            self.console.print(self._build_header(), style="bold cyan")
+            header = Panel(
+                Text("QUANTUM SWARM INTELLIGENCE TRADING ENGINE [v7.0.1-PROD]  |  SYSTEM: OPERATIONAL",
+                     style="bold cyan", justify="center"),
+                style="bold blue",
+                box=box.DOUBLE
+            )
+            self.console.print(header)
             self.console.print()
-            
-            # Row 1: Market + Signal
-            self.console.print(panels[1], end=" ")
-            self.console.print(panels[3])
+
+            # Row 1: Panel 1, 2, 3
+            self.console.print(Columns([panels[1], panels[2], panels[3]], equal=True, expand=True))
             self.console.print()
-            
-            # Row 2: AI Analysis + Trade Manager
-            self.console.print(panels[2], end=" ")
-            self.console.print(panels[4])
+
+            # Row 2: Panel 9, 5, 4
+            self.console.print(Columns([panels[9], panels[5], panels[4]], equal=True, expand=True))
             self.console.print()
-            
-            # Row 3: ML Status + Learning + Quantum
-            self.console.print(panels[5], end=" ")
-            self.console.print(panels[6], end=" ")
-            self.console.print(panels[7])
+
+            # Row 3: Panel 10, 6, 7
+            self.console.print(Columns([panels[10], panels[6], panels[7]], equal=True, expand=True))
             self.console.print()
-            
-            # Row 4: Macro + SMC + AI Reasoning
-            self.console.print(panels[8], end=" ")
-            self.console.print(panels[9], end=" ")
-            self.console.print(panels[10])
+
+            # Row 4: Panel 11, 8
+            self.console.print(Columns([panels[11], panels[8]], equal=True, expand=True))
             self.console.print()
-            
-            # Row 5: Performance + Evolution
-            self.console.print(panels[11], end=" ")
+
+            # Row 5: Panel 12 (full width)
             self.console.print(panels[12])
-            self.console.print()
-            
+
             # Footer
-            self.console.print(self._build_footer(), style="dim")
-            
+            footer = Panel(
+                Text("[P] Pause | [R] Resume | [Q] Quit | [B] Backtest | [S] Signal | [X] Close",
+                     style="dim", justify="center"),
+                style="dim",
+                box=box.SIMPLE
+            )
+            self.console.print()
+            self.console.print(footer)
+
         except Exception as e:
-            logger.error(f"Compact render failed: {e}")
+            logger.error(f"Render failed: {e}")
             self._render_text()
 
     def _render_text(self) -> None:
