@@ -5127,8 +5127,8 @@ class TUIDashboard:
             self.console.print(Columns([panels[10], panels[6], panels[7]], equal=True, expand=True))
             self.console.print()
 
-            # Row 4: Panel 11, 8, 13
-            self.console.print(Columns([panels[11], panels[8], panels[13]], equal=True, expand=True))
+            # Row 4: Panel 11, 8
+            self.console.print(Columns([panels[11], panels[8]], equal=True, expand=True))
             self.console.print()
 
             # Row 5: Panel 12 (full width)
