@@ -5145,44 +5145,48 @@ class TUIDashboard:
             self._render_compact(panels)
 
     def _render_compact(self, panels: Dict[int, Any]) -> None:
-        """Render in compact mode without Layout."""
+        """Render in compact mode with Columns for proper box layout."""
         try:
+            from rich.panel import Panel
+            from rich.text import Text
+            from rich import box
+            
             self.console.clear()
-            
+
             # Header
-            self.console.print(self._build_header(), style="bold cyan")
+            header = Panel(
+                Text("XAUUSD GOD BOT v3.0 | AI Trading System", style="bold cyan", justify="center"),
+                style="bold blue",
+                box=box.DOUBLE
+            )
+            self.console.print(header)
             self.console.print()
-            
-            # Row 1: Market + Signal
-            self.console.print(panels[1], end=" ")
-            self.console.print(panels[3])
+
+            # Row 1: Market + AI + Signal (3 panels in boxes)
+            self.console.print(Columns([panels[1], panels[2], panels[3]], equal=True, expand=True))
             self.console.print()
-            
-            # Row 2: AI Analysis + Trade Manager
-            self.console.print(panels[2], end=" ")
-            self.console.print(panels[4])
+
+            # Row 2: Trades + ML + Learning (3 panels in boxes)
+            self.console.print(Columns([panels[4], panels[5], panels[6]], equal=True, expand=True))
             self.console.print()
-            
-            # Row 3: ML Status + Learning + Quantum
-            self.console.print(panels[5], end=" ")
-            self.console.print(panels[6], end=" ")
-            self.console.print(panels[7])
+
+            # Row 3: Quantum + Macro + SMC (3 panels in boxes)
+            self.console.print(Columns([panels[7], panels[8], panels[9]], equal=True, expand=True))
             self.console.print()
-            
-            # Row 4: Macro + SMC + AI Reasoning
-            self.console.print(panels[8], end=" ")
-            self.console.print(panels[9], end=" ")
-            self.console.print(panels[10])
-            self.console.print()
-            
-            # Row 5: Performance + Evolution
-            self.console.print(panels[11], end=" ")
-            self.console.print(panels[12])
-            self.console.print()
-            
+
+            # Row 4: Reasoning + Perf + Evolution (3 panels in boxes)
+            self.console.print(Columns([panels[10], panels[11], panels[12]], equal=True, expand=True))
+
             # Footer
-            self.console.print(self._build_footer(), style="dim")
-            
+            footer = Panel(
+                Text("[P] Pause | [R] Resume | [Q] Quit | [B] Backtest | [S] Signal | [X] Close", 
+                     style="dim", justify="center"),
+                style="dim",
+                box=box.SIMPLE
+            )
+            self.console.print()
+            self.console.print(footer)
+
         except Exception as e:
             logger.error(f"Compact render failed: {e}")
             self._render_text()
