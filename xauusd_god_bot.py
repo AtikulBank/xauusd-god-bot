@@ -104,7 +104,7 @@ try:
         from rich.columns import Columns
         from rich.progress import Progress
         from rich.align import Align
-        from rich import box as rich_box
+        from rich import box
         rich_console = Console()
         rich_panel = Panel
         rich_table = Table
@@ -5145,41 +5145,26 @@ class TUIDashboard:
             self._render_compact(panels)
 
     def _render_compact(self, panels: Dict[int, Any]) -> None:
-        """Render in compact mode with Columns for proper box layout."""
+        """Render using 3-column Layout grid from fixed_tui_new."""
         try:
+            from rich.console import Group
             from rich.panel import Panel
             from rich.text import Text
             from rich import box
-            
+            from fixed_tui_new import SharedMemory as FixedSharedMemory, build_layout, build_header
+
+            # Create a temporary SharedMemory for the Layout TUI
+            temp_state = FixedSharedMemory()
+            temp_state.price = getattr(self.state, 'current_price', 1.08412)
+
             self.console.clear()
-
-            # Header
-            header = Panel(
-                Text("XAUUSD GOD BOT v3.0 | AI Trading System", style="bold cyan", justify="center"),
-                style="bold blue",
-                box=box.DOUBLE
-            )
-            self.console.print(header)
-            self.console.print()
-
-            # Row 1: Market + AI + Signal (3 panels in boxes)
-            self.console.print(Columns([panels[1], panels[2], panels[3]], equal=True, expand=True))
-            self.console.print()
-
-            # Row 2: Trades + ML + Learning (3 panels in boxes)
-            self.console.print(Columns([panels[4], panels[5], panels[6]], equal=True, expand=True))
-            self.console.print()
-
-            # Row 3: Quantum + Macro + SMC (3 panels in boxes)
-            self.console.print(Columns([panels[7], panels[8], panels[9]], equal=True, expand=True))
-            self.console.print()
-
-            # Row 4: Reasoning + Perf + Evolution (3 panels in boxes)
-            self.console.print(Columns([panels[10], panels[11], panels[12]], equal=True, expand=True))
+            header = build_header()
+            layout = build_layout(temp_state)
+            self.console.print(Group(header, "", layout))
 
             # Footer
             footer = Panel(
-                Text("[P] Pause | [R] Resume | [Q] Quit | [B] Backtest | [S] Signal | [X] Close", 
+                Text("[P] Pause | [R] Resume | [Q] Quit | [B] Backtest | [S] Signal | [X] Close",
                      style="dim", justify="center"),
                 style="dim",
                 box=box.SIMPLE
@@ -5188,7 +5173,7 @@ class TUIDashboard:
             self.console.print(footer)
 
         except Exception as e:
-            logger.error(f"Compact render failed: {e}")
+            logger.error(f"Layout render failed: {e}")
             self._render_text()
 
     def _render_text(self) -> None:
