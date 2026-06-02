@@ -73,7 +73,7 @@ redis_port: 6379
 report_path: reports/
 retrain_interval_hours: 1
 signal_expiry_minutes: 15
-signal_score_threshold: 750
+signal_score_threshold: 500
 telegram_bot_token: ''
 telegram_chat_id: ''
 tick_target_latency_us: 500
